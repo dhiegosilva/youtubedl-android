@@ -1,0 +1,7 @@
+# OAuth Credentials Template
+# Copy this file to oauth.properties and fill in your credentials
+# DO NOT commit oauth.properties to version control
+
+oauth.client.id=YOUR_CLIENT_ID_HERE
+oauth.client.secret=YOUR_CLIENT_SECRET_HERE
+

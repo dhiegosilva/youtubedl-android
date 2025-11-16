@@ -14,3 +14,6 @@
 .externalNativeBuild
 target
 /buildSrc/build
+
+# OAuth credentials - DO NOT COMMIT
+app/src/main/assets/oauth.properties

@@ -6,46 +6,94 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-
-    <Button
-        android:id="@+id/btn_streaming_example"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="132dp"
-        android:text="@string/btn_streaming_example"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <Button
-        android:id="@+id/btn_downloading_example"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="40dp"
-        android:text="@string/btn_downloading_example"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btn_streaming_example" />
-
-    <Button
-        android:id="@+id/btn_command_example"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="40dp"
-        android:text="@string/btn_command_example"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btn_downloading_example" />
-
-    <Button
-        android:id="@+id/btn_update"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="100dp"
-        android:text="@string/btn_update"
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <Button
+                android:id="@+id/btn_login"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Login with Google"
+                android:layout_marginBottom="16dp" />
+
+            <TextView
+                android:id="@+id/tv_login_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Not logged in"
+                android:layout_marginBottom="24dp"
+                android:textSize="14sp" />
+
+            <Button
+                android:id="@+id/btn_subscriptions"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="My Subscriptions"
+                android:layout_marginBottom="16dp"
+                android:enabled="false" />
+
+            <Button
+                android:id="@+id/btn_playlists"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="My Playlists"
+                android:layout_marginBottom="16dp"
+                android:enabled="false" />
+
+            <Button
+                android:id="@+id/btn_recommendations"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Recommendations"
+                android:layout_marginBottom="24dp"
+                android:enabled="false" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#CCCCCC"
+                android:layout_marginBottom="24dp" />
+
+            <Button
+                android:id="@+id/btn_streaming_example"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/btn_streaming_example"
+                android:layout_marginBottom="16dp" />
+
+            <Button
+                android:id="@+id/btn_downloading_example"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/btn_downloading_example"
+                android:layout_marginBottom="16dp" />
+
+            <Button
+                android:id="@+id/btn_command_example"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/btn_command_example"
+                android:layout_marginBottom="16dp" />
+
+            <Button
+                android:id="@+id/btn_update"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/btn_update" />
+
+        </LinearLayout>
+    </ScrollView>
 
     <ProgressBar
         android:id="@+id/progress_bar"

@@ -47,6 +47,13 @@ public class StreamingExampleActivity extends AppCompatActivity implements View.
         etUrl = findViewById(R.id.et_url);
         videoView = findViewById(R.id.video_view);
         pbLoading = findViewById(R.id.pb_status);
+        
+        // Check if video URL was passed from intent
+        String videoUrl = getIntent().getStringExtra("video_url");
+        if (videoUrl != null && !videoUrl.isEmpty()) {
+            etUrl.setText(videoUrl);
+            startStream();
+        }
     }
 
     private void initListeners() {

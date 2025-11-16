@@ -30,6 +30,18 @@
         <activity
             android:name=".CommandExampleActivity"
             android:screenOrientation="portrait"></activity>
+        <activity
+            android:name=".LoginActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".SubscriptionsActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".PlaylistsActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".RecommendationsActivity"
+            android:screenOrientation="portrait" />
     </application>
 
 </manifest>

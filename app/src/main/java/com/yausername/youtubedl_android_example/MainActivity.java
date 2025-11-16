@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -26,10 +27,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Button btnDownloadingExample;
     private Button btnCommandExample;
     private Button btnUpdate;
+    private Button btnLogin;
+    private Button btnSubscriptions;
+    private Button btnPlaylists;
+    private Button btnRecommendations;
+    private TextView tvLoginStatus;
     private ProgressBar progressBar;
 
     private boolean updating = false;
     private final CompositeDisposable compositeDisposable = new CompositeDisposable();
+    private GoogleAuthHelper authHelper;
+    private static final int REQUEST_CODE_LOGIN = 1001;
 
     private static final String TAG = "MainActivity";
 
@@ -38,8 +46,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        authHelper = new GoogleAuthHelper(this);
         initViews();
         initListeners();
+        updateLoginStatus();
+    }
+    
+    @Override
+    protected void onResume() {
+        super.onResume();
+        updateLoginStatus();
     }
 
     @Override
@@ -53,6 +69,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btnDownloadingExample.setOnClickListener(this);
         btnCommandExample.setOnClickListener(this);
         btnUpdate.setOnClickListener(this);
+        btnLogin.setOnClickListener(this);
+        btnSubscriptions.setOnClickListener(this);
+        btnPlaylists.setOnClickListener(this);
+        btnRecommendations.setOnClickListener(this);
     }
 
     private void initViews() {
@@ -60,14 +80,54 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btnDownloadingExample = findViewById(R.id.btn_downloading_example);
         btnCommandExample = findViewById(R.id.btn_command_example);
         btnUpdate = findViewById(R.id.btn_update);
+        btnLogin = findViewById(R.id.btn_login);
+        btnSubscriptions = findViewById(R.id.btn_subscriptions);
+        btnPlaylists = findViewById(R.id.btn_playlists);
+        btnRecommendations = findViewById(R.id.btn_recommendations);
+        tvLoginStatus = findViewById(R.id.tv_login_status);
         progressBar = findViewById(R.id.progress_bar);
+    }
+    
+    private void updateLoginStatus() {
+        boolean isLoggedIn = authHelper.isLoggedIn();
+        if (isLoggedIn) {
+            tvLoginStatus.setText("Logged in");
+            btnLogin.setText("Logout");
+            btnSubscriptions.setEnabled(true);
+            btnPlaylists.setEnabled(true);
+            btnRecommendations.setEnabled(true);
+        } else {
+            tvLoginStatus.setText("Not logged in");
+            btnLogin.setText("Login with Google");
+            btnSubscriptions.setEnabled(false);
+            btnPlaylists.setEnabled(false);
+            btnRecommendations.setEnabled(false);
+        }
     }
 
     @Override
     public void onClick(View v) {
         int id = v.getId();
 
-        if (id == R.id.btn_streaming_example) {
+        if (id == R.id.btn_login) {
+            if (authHelper.isLoggedIn()) {
+                authHelper.clearTokens();
+                updateLoginStatus();
+                Toast.makeText(this, "Logged out", Toast.LENGTH_SHORT).show();
+            } else {
+                Intent i = new Intent(MainActivity.this, LoginActivity.class);
+                startActivityForResult(i, REQUEST_CODE_LOGIN);
+            }
+        } else if (id == R.id.btn_subscriptions) {
+            Intent i = new Intent(MainActivity.this, SubscriptionsActivity.class);
+            startActivity(i);
+        } else if (id == R.id.btn_playlists) {
+            Intent i = new Intent(MainActivity.this, PlaylistsActivity.class);
+            startActivity(i);
+        } else if (id == R.id.btn_recommendations) {
+            Intent i = new Intent(MainActivity.this, RecommendationsActivity.class);
+            startActivity(i);
+        } else if (id == R.id.btn_streaming_example) {
             Intent i = new Intent(MainActivity.this, StreamingExampleActivity.class);
             startActivity(i);
 
@@ -93,6 +153,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             })
                     .create();
             dialog.show();
+        }
+    }
+    
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_CODE_LOGIN && resultCode == RESULT_OK) {
+            updateLoginStatus();
         }
     }
 
