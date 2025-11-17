@@ -23,9 +23,6 @@ import io.reactivex.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
-    private Button btnStreamingExample;
-    private Button btnDownloadingExample;
-    private Button btnCommandExample;
     private Button btnUpdate;
     private Button btnLogin;
     private Button btnSubscriptions;
@@ -65,9 +62,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void initListeners() {
-        btnStreamingExample.setOnClickListener(this);
-        btnDownloadingExample.setOnClickListener(this);
-        btnCommandExample.setOnClickListener(this);
         btnUpdate.setOnClickListener(this);
         btnLogin.setOnClickListener(this);
         btnSubscriptions.setOnClickListener(this);
@@ -76,9 +70,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void initViews() {
-        btnStreamingExample = findViewById(R.id.btn_streaming_example);
-        btnDownloadingExample = findViewById(R.id.btn_downloading_example);
-        btnCommandExample = findViewById(R.id.btn_command_example);
         btnUpdate = findViewById(R.id.btn_update);
         btnLogin = findViewById(R.id.btn_login);
         btnSubscriptions = findViewById(R.id.btn_subscriptions);
@@ -122,23 +113,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Intent i = new Intent(MainActivity.this, SubscriptionsActivity.class);
             startActivity(i);
         } else if (id == R.id.btn_playlists) {
-            Intent i = new Intent(MainActivity.this, PlaylistsActivity.class);
+            Intent i = new Intent(MainActivity.this, PlaylistListActivity.class);
             startActivity(i);
         } else if (id == R.id.btn_recommendations) {
             Intent i = new Intent(MainActivity.this, RecommendationsActivity.class);
             startActivity(i);
-        } else if (id == R.id.btn_streaming_example) {
-            Intent i = new Intent(MainActivity.this, StreamingExampleActivity.class);
-            startActivity(i);
-
-        } else if (id == R.id.btn_downloading_example) {
-            Intent i = new Intent(MainActivity.this, DownloadingExampleActivity.class);
-            startActivity(i);
-
-        } else if (id == R.id.btn_command_example) {
-            Intent i = new Intent(MainActivity.this, CommandExampleActivity.class);
-            startActivity(i);
-
         } else if (id == R.id.btn_update) {
             AlertDialog dialog = new AlertDialog.Builder(this)
                     .setTitle("Update Channel")

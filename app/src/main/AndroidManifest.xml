@@ -37,7 +37,10 @@
             android:name=".SubscriptionsActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".PlaylistsActivity"
+            android:name=".PlaylistListActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".PlaylistVideosActivity"
             android:screenOrientation="portrait" />
         <activity
             android:name=".RecommendationsActivity"

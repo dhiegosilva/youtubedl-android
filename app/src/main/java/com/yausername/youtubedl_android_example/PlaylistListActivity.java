@@ -12,7 +12,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.api.services.youtube.YouTube;
-import com.google.api.services.youtube.YouTubeScopes;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,13 +22,12 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
-public abstract class VideoListActivity extends AppCompatActivity {
-    protected RecyclerView recyclerView;
-    protected ProgressBar progressBar;
-    protected VideoAdapter adapter;
-    protected GoogleAuthHelper authHelper;
-    protected YouTubeApiService apiService;
-    protected CompositeDisposable compositeDisposable = new CompositeDisposable();
+public class PlaylistListActivity extends AppCompatActivity {
+    private RecyclerView recyclerView;
+    private ProgressBar progressBar;
+    private PlaylistAdapter adapter;
+    private GoogleAuthHelper authHelper;
+    private CompositeDisposable compositeDisposable = new CompositeDisposable();
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,10 +40,11 @@ public abstract class VideoListActivity extends AppCompatActivity {
         progressBar = findViewById(R.id.progress_bar);
         
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new VideoAdapter(new ArrayList<>(), videoItem -> {
-            // Play video
-            Intent intent = new Intent(this, StreamingExampleActivity.class);
-            intent.putExtra("video_url", videoItem.getVideoUrl());
+        adapter = new PlaylistAdapter(new ArrayList<>(), playlist -> {
+            // Open playlist videos activity
+            Intent intent = new Intent(this, PlaylistVideosActivity.class);
+            intent.putExtra("playlist_id", playlist.playlistId);
+            intent.putExtra("playlist_title", playlist.title);
             startActivity(intent);
         });
         recyclerView.setAdapter(adapter);
@@ -56,58 +55,49 @@ public abstract class VideoListActivity extends AppCompatActivity {
             return;
         }
         
-        loadVideos();
+        loadPlaylists();
     }
     
-    protected abstract List<YouTubeApiService.VideoItem> fetchVideos(YouTubeApiService service);
-    
-    private void loadVideos() {
+    private void loadPlaylists() {
         progressBar.setVisibility(View.VISIBLE);
         
         Disposable disposable = Observable.fromCallable(() -> {
                     try {
-                        // Get the account from saved token
                         String accessToken = authHelper.getAccessToken();
                         if (accessToken == null) {
                             throw new Exception("Not logged in");
                         }
                         
-                        // Use the token-based approach to create YouTube service
                         YouTube youtubeService = authHelper.getYouTubeService(
                                 accessToken,
                                 authHelper.getRefreshToken());
                         
                         YouTubeApiService service = new YouTubeApiService(youtubeService);
-                        return fetchVideos(service);
+                        return service.getPlaylistList();
                     } catch (Exception e) {
-                        Log.e("VideoListActivity", "Error loading videos", e);
+                        Log.e("PlaylistListActivity", "Error loading playlists", e);
                         throw new RuntimeException(e);
                     }
                 })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(videos -> {
+                .subscribe(playlists -> {
                     progressBar.setVisibility(View.GONE);
-                    if (videos != null && !videos.isEmpty()) {
-                        adapter.updateVideos(videos);
-                        Toast.makeText(this, "Loaded " + videos.size() + " video(s)", Toast.LENGTH_SHORT).show();
+                    if (playlists != null && !playlists.isEmpty()) {
+                        adapter.updatePlaylists(playlists);
+                        Toast.makeText(this, "Loaded " + playlists.size() + " playlist(s)", Toast.LENGTH_SHORT).show();
                     } else {
-                        adapter.updateVideos(new ArrayList<>());
-                        Toast.makeText(this, "No videos found", Toast.LENGTH_SHORT).show();
+                        adapter.updatePlaylists(new ArrayList<>());
+                        Toast.makeText(this, "No playlists found", Toast.LENGTH_SHORT).show();
                     }
                 }, error -> {
                     progressBar.setVisibility(View.GONE);
-                    Log.e("VideoListActivity", "Error", error);
+                    Log.e("PlaylistListActivity", "Error", error);
                     String errorMsg = error.getMessage();
                     if (error.getCause() != null) {
                         errorMsg = error.getCause().getMessage();
                     }
-                    // Check for quota exceeded
-                    if (errorMsg != null && (errorMsg.contains("quota") || errorMsg.contains("quotaExceeded"))) {
-                        Toast.makeText(this, "YouTube API quota exceeded.\n\nDaily quota limit reached.\nQuota resets at midnight Pacific Time.", Toast.LENGTH_LONG).show();
-                    } else {
-                        Toast.makeText(this, "Error loading videos: " + errorMsg, Toast.LENGTH_LONG).show();
-                    }
+                    Toast.makeText(this, "Error loading playlists: " + errorMsg, Toast.LENGTH_LONG).show();
                 });
         
         compositeDisposable.add(disposable);
