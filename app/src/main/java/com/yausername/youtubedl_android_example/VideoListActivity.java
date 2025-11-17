@@ -59,7 +59,7 @@ public abstract class VideoListActivity extends AppCompatActivity {
         loadVideos();
     }
     
-    protected abstract List<YouTubeApiService.VideoItem> fetchVideos(YouTubeApiService service);
+    protected abstract List<YouTubeApiService.VideoItem> fetchVideos(YouTubeApiService service) throws Exception;
     
     private void loadVideos() {
         progressBar.setVisibility(View.VISIBLE);
