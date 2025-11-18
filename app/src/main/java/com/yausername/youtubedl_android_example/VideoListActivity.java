@@ -31,6 +31,10 @@ public abstract class VideoListActivity extends AppCompatActivity {
     protected YouTubeApiService apiService;
     protected CompositeDisposable compositeDisposable = new CompositeDisposable();
     
+    // Cache YouTube service to avoid recreating
+    private YouTube cachedYouTubeService;
+    private String cachedAccessToken;
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,7 +45,10 @@ public abstract class VideoListActivity extends AppCompatActivity {
         recyclerView = findViewById(R.id.recycler_view);
         progressBar = findViewById(R.id.progress_bar);
         
+        // Optimize RecyclerView
+        recyclerView.setHasFixedSize(false); // Allow size changes for better performance with dynamic lists
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setItemViewCacheSize(20); // Cache more views to reduce layout passes
         adapter = new VideoAdapter(new ArrayList<>(), videoItem -> {
             // Play video
             Intent intent = new Intent(this, StreamingExampleActivity.class);
@@ -61,6 +68,20 @@ public abstract class VideoListActivity extends AppCompatActivity {
     
     protected abstract List<YouTubeApiService.VideoItem> fetchVideos(YouTubeApiService service) throws Exception;
     
+    private YouTube getOrCreateYouTubeService() {
+        String currentAccessToken = authHelper.getAccessToken();
+        // Reuse service if token hasn't changed
+        if (cachedYouTubeService != null && currentAccessToken != null && currentAccessToken.equals(cachedAccessToken)) {
+            return cachedYouTubeService;
+        }
+        
+        cachedAccessToken = currentAccessToken;
+        cachedYouTubeService = authHelper.getYouTubeService(
+                currentAccessToken,
+                authHelper.getRefreshToken());
+        return cachedYouTubeService;
+    }
+    
     private void loadVideos() {
         progressBar.setVisibility(View.VISIBLE);
         
@@ -72,11 +93,8 @@ public abstract class VideoListActivity extends AppCompatActivity {
                             throw new Exception("Not logged in");
                         }
                         
-                        // Use the token-based approach to create YouTube service
-                        YouTube youtubeService = authHelper.getYouTubeService(
-                                accessToken,
-                                authHelper.getRefreshToken());
-                        
+                        // Reuse cached YouTube service if available
+                        YouTube youtubeService = getOrCreateYouTubeService();
                         YouTubeApiService service = new YouTubeApiService(youtubeService);
                         return fetchVideos(service);
                     } catch (Exception e) {

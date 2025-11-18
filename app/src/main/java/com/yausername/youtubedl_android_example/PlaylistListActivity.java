@@ -29,6 +29,10 @@ public class PlaylistListActivity extends AppCompatActivity {
     private GoogleAuthHelper authHelper;
     private CompositeDisposable compositeDisposable = new CompositeDisposable();
     
+    // Cache YouTube service to avoid recreating
+    private YouTube cachedYouTubeService;
+    private String cachedAccessToken;
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,7 +43,10 @@ public class PlaylistListActivity extends AppCompatActivity {
         recyclerView = findViewById(R.id.recycler_view);
         progressBar = findViewById(R.id.progress_bar);
         
+        // Optimize RecyclerView
+        recyclerView.setHasFixedSize(false); // Allow size changes for better performance with dynamic lists
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setItemViewCacheSize(20); // Cache more views to reduce layout passes
         adapter = new PlaylistAdapter(new ArrayList<>(), playlist -> {
             // Open playlist videos activity
             Intent intent = new Intent(this, PlaylistVideosActivity.class);
@@ -58,6 +65,20 @@ public class PlaylistListActivity extends AppCompatActivity {
         loadPlaylists();
     }
     
+    private YouTube getOrCreateYouTubeService() {
+        String currentAccessToken = authHelper.getAccessToken();
+        // Reuse service if token hasn't changed
+        if (cachedYouTubeService != null && currentAccessToken != null && currentAccessToken.equals(cachedAccessToken)) {
+            return cachedYouTubeService;
+        }
+        
+        cachedAccessToken = currentAccessToken;
+        cachedYouTubeService = authHelper.getYouTubeService(
+                currentAccessToken,
+                authHelper.getRefreshToken());
+        return cachedYouTubeService;
+    }
+    
     private void loadPlaylists() {
         progressBar.setVisibility(View.VISIBLE);
         
@@ -68,10 +89,8 @@ public class PlaylistListActivity extends AppCompatActivity {
                             throw new Exception("Not logged in");
                         }
                         
-                        YouTube youtubeService = authHelper.getYouTubeService(
-                                accessToken,
-                                authHelper.getRefreshToken());
-                        
+                        // Reuse cached YouTube service if available
+                        YouTube youtubeService = getOrCreateYouTubeService();
                         YouTubeApiService service = new YouTubeApiService(youtubeService);
                         return service.getPlaylistList();
                     } catch (Exception e) {

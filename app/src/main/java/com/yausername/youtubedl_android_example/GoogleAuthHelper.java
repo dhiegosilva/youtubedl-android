@@ -21,6 +21,9 @@ public class GoogleAuthHelper {
     private static final com.google.api.client.json.JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
     private static final String APPLICATION_NAME = "YouTube-DL Android";
     
+    // Cache transport instance to avoid recreating it (expensive operation)
+    private static volatile NetHttpTransport cachedTransport;
+    
     private Context context;
     private SharedPreferences prefs;
     private static final String PREF_NAME = "youtube_auth";
@@ -28,8 +31,19 @@ public class GoogleAuthHelper {
     private static final String KEY_REFRESH_TOKEN = "refresh_token";
     
     public GoogleAuthHelper(Context context) {
-        this.context = context;
+        this.context = context.getApplicationContext(); // Use application context to prevent leaks
         this.prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+    }
+    
+    private static NetHttpTransport getTransport() {
+        if (cachedTransport == null) {
+            synchronized (GoogleAuthHelper.class) {
+                if (cachedTransport == null) {
+                    cachedTransport = new NetHttpTransport();
+                }
+            }
+        }
+        return cachedTransport;
     }
     
     public Credential getCredential(String accessToken, String refreshToken) {
@@ -37,7 +51,7 @@ public class GoogleAuthHelper {
         String clientSecret = OAuthConfig.getClientSecret(context);
         
         GoogleCredential credential = new GoogleCredential.Builder()
-                .setTransport(new NetHttpTransport())
+                .setTransport(getTransport()) // Reuse cached transport
                 .setJsonFactory(JSON_FACTORY)
                 .setClientSecrets(clientId, clientSecret)
                 .build();
@@ -54,7 +68,7 @@ public class GoogleAuthHelper {
         Credential credential = getCredential(accessToken, refreshToken);
         
         return new YouTube.Builder(
-                new NetHttpTransport(),
+                getTransport(), // Reuse cached transport
                 JSON_FACTORY,
                 credential)
                 .setApplicationName(APPLICATION_NAME)

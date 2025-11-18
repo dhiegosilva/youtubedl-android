@@ -88,7 +88,7 @@ public class StreamingExampleActivity extends AppCompatActivity implements View.
                     request.addOption("-f", "best");
                     return YoutubeDL.getInstance().getInfo(request);
                 })
-                .subscribeOn(Schedulers.newThread())
+                .subscribeOn(Schedulers.io()) // Use io() instead of newThread() for better thread pool management
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(streamInfo -> {
                     pbLoading.setVisibility(View.GONE);
@@ -108,5 +108,20 @@ public class StreamingExampleActivity extends AppCompatActivity implements View.
 
     private void setupVideoView(String videoUrl) {
         videoView.setMedia(Uri.parse(videoUrl));
+    }
+    
+    @Override
+    protected void onPause() {
+        super.onPause();
+        // Pause video when activity is paused to save resources
+        if (videoView != null && videoView.isPlaying()) {
+            videoView.pause();
+        }
+    }
+    
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Optionally resume playback if needed
     }
 }

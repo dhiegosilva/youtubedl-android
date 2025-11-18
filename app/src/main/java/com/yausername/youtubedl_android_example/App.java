@@ -4,6 +4,8 @@ import android.app.Application;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.squareup.picasso.LruCache;
+import com.squareup.picasso.Picasso;
 import com.yausername.aria2c.Aria2c;
 import com.yausername.ffmpeg.FFmpeg;
 import com.yausername.youtubedl_android.YoutubeDL;
@@ -24,6 +26,7 @@ public class App extends Application {
     public void onCreate() {
         super.onCreate();
 
+        configurePicasso();
         configureRxJavaErrorHandler();
         Completable.fromAction(this::initLibraries).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(new DisposableCompletableObserver() {
             @Override
@@ -37,6 +40,20 @@ public class App extends Application {
                 Toast.makeText(getApplicationContext(), "initialization failed: " + e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
             }
         });
+    }
+    
+    private void configurePicasso() {
+        // Configure Picasso with optimized memory cache (15MB) to reduce memory usage
+        // Default is 15% of available memory, which can be too much on low-end devices
+        long maxMemory = Runtime.getRuntime().maxMemory();
+        long cacheSize = Math.min(15 * 1024 * 1024, maxMemory / 8); // Max 15MB or 1/8 of available memory
+        
+        Picasso picasso = new Picasso.Builder(this)
+                .memoryCache(new LruCache((int) cacheSize))
+                .indicatorsEnabled(false) // Disable debug indicators in production
+                .loggingEnabled(false) // Disable logging to save CPU
+                .build();
+        Picasso.setSingletonInstance(picasso);
     }
 
     private void configureRxJavaErrorHandler() {
