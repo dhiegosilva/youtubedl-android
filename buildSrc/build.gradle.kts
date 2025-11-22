@@ -10,7 +10,7 @@ repositories {
 }
 
 dependencies {
-    implementation("com.android.tools.build:gradle:8.13.0")
+    implementation("com.android.tools.build:gradle:8.13.1")
     implementation(gradleApi())
     implementation(localGroovy())
 }
