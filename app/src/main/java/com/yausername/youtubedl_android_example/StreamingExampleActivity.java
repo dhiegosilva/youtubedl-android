@@ -84,8 +84,23 @@ public class StreamingExampleActivity extends AppCompatActivity implements View.
         pbLoading.setVisibility(View.VISIBLE);
         Disposable disposable = Observable.fromCallable(() -> {
                     YoutubeDLRequest request = new YoutubeDLRequest(url);
-                    // best stream containing video+audio
-                    request.addOption("-f", "best");
+                    
+                    // Optimized format selection: prioritize lower quality for faster buffering
+                    // Falls back to higher quality if lower isn't available
+                    request.addOption("-f", "best[height<=720]/best[height<=480]/best");
+                    
+                    // Reduce HTTP chunk size for faster initial buffering (10MB chunks)
+                    request.addOption("--http-chunk-size", "10485760");
+                    
+                    // Reduce socket timeout for faster retries
+                    request.addOption("--socket-timeout", "10");
+                    
+                    // Reduce retries for faster failure handling
+                    request.addOption("--retries", "3");
+                    
+                    // Skip playlist processing if not needed
+                    request.addOption("--no-playlist");
+                    
                     return YoutubeDL.getInstance().getInfo(request);
                 })
                 .subscribeOn(Schedulers.newThread())
@@ -107,6 +122,7 @@ public class StreamingExampleActivity extends AppCompatActivity implements View.
     }
 
     private void setupVideoView(String videoUrl) {
+        // Set media with URI - playback will start when buffer is ready
         videoView.setMedia(Uri.parse(videoUrl));
     }
 }
